@@ -27,26 +27,28 @@ app.get("/", function(req, res) {
 });
 
 app.get("/search", function(req, res) {
-  //console.dir(req);
-  // console.log(req.query.keyword);
   let keyword = req.query.keyword;
-  let url = `https://api.unsplash.com/photos/random?query=${keyword}&count=9&client_id=0a82899cb0939e4b3b34d2e48fd5efe94fdf18c54f2970941db6873f5280d45a&orientation=landscape`;
+  getRandomImages_cb(keyword, 9, function(imageURLs) {
+    console.log("imageURLs: " + imageURLs);
+    res.render("results", { imageURLs: imageURLs });
+  });
+}); //search
+
+function getRandomImages_cb(keyword, imageCount, callback) {
+  let url = `https://api.unsplash.com/photos/random?query=${keyword}&count=${imageCount}&client_id=0a82899cb0939e4b3b34d2e48fd5efe94fdf18c54f2970941db6873f5280d45a&orientation=landscape`;
   request(url, function(error, response, body) {
-    // console.log("error", error);
-    // console.log("statusCode", response && response.statusCode);
-    // console.log("body", body);
     if (!error) {
       let parsedData = JSON.parse(body);
       let imageURLs = [];
       for (let i = 0; i < 9; i++) {
         imageURLs.push(parsedData[i].urls.regular);
       }
-      res.render("results", { imageURLs: imageURLs });
+      callback(imageURLs);
     } else {
-      res.render("results", { error: "unable to access API" });
+      console.log("error", error);
     }
   });
-}); //search
+}
 
 app.get("/venus", function(req, res) {
   res.render("venus.html");
