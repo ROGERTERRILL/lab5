@@ -18,34 +18,36 @@ app.get("/", async function(req, res) {
 app.get("/search", async function(req, res) {
   let keyword = req.query.keyword;
   let imageURLs = await tools.getRandomImages(keyword, 9);
-  console.log("imageURLs using promises: " + imageURLs);
-  res.render("results", { imageURLs: imageURLs });
-
-  // CALLBACK APPROACH
-  // getRandomImages_cb(keyword, 9, function(imageURLs) {
-  //   console.log("imageURLs: " + imageURLs);
-  //   res.render("results", { imageURLs: imageURLs });
-
-  // });
+  res.render("results", { imageURLs: imageURLs, keyword: keyword });
 }); //search
 
-
-
-function getRandomImages_cb(keyword, imageCount, callback) {
-  let url = `https://api.unsplash.com/photos/random?query=${keyword}&count=${imageCount}&client_id=0a82899cb0939e4b3b34d2e48fd5efe94fdf18c54f2970941db6873f5280d45a&orientation=landscape`;
-  request(url, function(error, response, body) {
-    if (!error) {
-      let parsedData = JSON.parse(body);
-      let imageURLs = [];
-      for (let i = 0; i < 9; i++) {
-        imageURLs.push(parsedData[i].urls.regular);
-      }
-      callback(imageURLs);
-    } else {
-      console.log("error", error);
-    }
+app.get("/api/updateFavorites", function(req, res) {
+  const conn = mysql.createConnection({
+    host: "h7xe2knj2qb6kxal.cbetxkdyhwsb.us-east-1.rds.amazonaws.com",
+    user: "gnewapnqn1mxo7lh",
+    password: "mc7p457sh8eiw6t0",
+    database: "p2m3kzarz8vuqcpc"
   });
-}
+
+  let sql;
+  let sqlParams;
+
+  if (req.query.action == "add") {
+    sql = "INSERT INTO favorites (imageURL, keyword) VALUES (?,?)";
+    sqlParams = [req.query.imageURL, req.query.keyword];
+  } else {
+    sql="DELETE FROM favorites WHERE imageURL = ?";
+    sqlParams = [req.query.imageURL];
+  }
+
+  conn.connect(function(err) {
+    if (err) throw err;
+    conn.query(sql, sqlParams, function(err, result) {
+      if (err) throw err;
+    });
+  });
+  res.send("it works");
+});
 
 app.get("/venus", function(req, res) {
   res.render("venus.html");
