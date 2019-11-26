@@ -1,4 +1,5 @@
 const request = require("request");
+const mysql = require("mysql");
 
 /**
  * Return random image URLs from an API
@@ -27,4 +28,15 @@ function getRandomImages(keyword, imageCount) {
   });
 }
 
-module.exports = { getRandomImages };
+function createConnection() {
+  const conn = mysql.createConnection({
+    host: "h7xe2knj2qb6kxal.cbetxkdyhwsb.us-east-1.rds.amazonaws.com",
+    user: "gnewapnqn1mxo7lh",
+    password: "mc7p457sh8eiw6t0",
+    database: "p2m3kzarz8vuqcpc"
+  });
+
+  return conn;
+}
+
+module.exports = { getRandomImages, createConnection };

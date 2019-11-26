@@ -22,13 +22,7 @@ app.get("/search", async function(req, res) {
 }); //search
 
 app.get("/api/updateFavorites", function(req, res) {
-  const conn = mysql.createConnection({
-    host: "h7xe2knj2qb6kxal.cbetxkdyhwsb.us-east-1.rds.amazonaws.com",
-    user: "gnewapnqn1mxo7lh",
-    password: "mc7p457sh8eiw6t0",
-    database: "p2m3kzarz8vuqcpc"
-  });
-
+  let conn = tools.createConnection();
   let sql;
   let sqlParams;
 
@@ -36,7 +30,7 @@ app.get("/api/updateFavorites", function(req, res) {
     sql = "INSERT INTO favorites (imageURL, keyword) VALUES (?,?)";
     sqlParams = [req.query.imageURL, req.query.keyword];
   } else {
-    sql="DELETE FROM favorites WHERE imageURL = ?";
+    sql = "DELETE FROM favorites WHERE imageURL = ?";
     sqlParams = [req.query.imageURL];
   }
 
@@ -49,12 +43,30 @@ app.get("/api/updateFavorites", function(req, res) {
   res.send("it works");
 });
 
-app.get("/venus", function(req, res) {
-  res.render("venus.html");
+app.get("/displayKeywords", function(req, res) {
+  let conn = tools.createConnection();
+  let sql = "SELECT DISTINCT keyword FROM favorites ORDER BY keyword";
+  conn.connect(function(err) {
+    if (err) throw err;
+    conn.query(sql, function(err, result) {
+      if (err) throw err;
+      res.render("favorites", { rows: result });
+    });
+  });
 });
 
-app.get("/earth", function(req, res) {
-  res.render("earth.html");
+app.get("/api/displayFavorites", function(req, res) {
+  let conn = tools.createConnection();
+  let sql = "SELECT imageURL FROM favorites WHERE keyword = ?";
+  let sqlParams = [req.query.keyword];
+
+  conn.connect(function(err) {
+    if (err) throw err;
+    conn.query(sql, sqlParams, function(err, result) {
+      if (err) throw err;
+      res.send(result);
+    });
+  });
 });
 
 app.get("/mars", function(req, res) {
