@@ -43,14 +43,15 @@ app.get("/api/updateFavorites", function(req, res) {
   res.send("it works");
 });
 
-app.get("/displayKeywords", function(req, res) {
+app.get("/displayKeywords", async function(req, res) {
+  let imageURLs = await tools.getRandomImages("", 1);
   let conn = tools.createConnection();
   let sql = "SELECT DISTINCT keyword FROM favorites ORDER BY keyword";
   conn.connect(function(err) {
     if (err) throw err;
     conn.query(sql, function(err, result) {
       if (err) throw err;
-      res.render("favorites", { rows: result });
+      res.render("favorites", { rows: result, imageURLs:imageURLs });
     });
   });
 });
@@ -69,9 +70,6 @@ app.get("/api/displayFavorites", function(req, res) {
   });
 });
 
-app.get("/mars", function(req, res) {
-  res.render("mars.html");
-});
 
 //server listener
 app.listen(process.env.PORT || 8081, process.env.IP, function() {
